@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/atom/Desktop/srujana/Day 7/Haar_c++.cpp
+opencv2/objdetect/objdetect.hpp
+/home/atom/Desktop/srujana/Day 7/opencv2/objdetect/objdetect.hpp
+opencv2/highgui/highgui.hpp
+/home/atom/Desktop/srujana/Day 7/opencv2/highgui/highgui.hpp
+opencv2/imgproc/imgproc.hpp
+/home/atom/Desktop/srujana/Day 7/opencv2/imgproc/imgproc.hpp
+iostream
+-
+stdio.h
+-
+

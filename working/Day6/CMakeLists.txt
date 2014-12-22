@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 2.8)
+project( Eye_IP_2 )
+find_package( OpenCV REQUIRED )
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+add_executable( Eye_IP_2 Eye_IP_2.cpp )
+target_link_libraries( Eye_IP_2 ${OpenCV_LIBS} )

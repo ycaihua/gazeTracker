@@ -1,0 +1,16 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/atom/Desktop/srujana/Day6/Eye_IP_1.cpp
+stdio.h
+-
+opencv2/opencv.hpp
+-
+stdlib.h
+-
+
