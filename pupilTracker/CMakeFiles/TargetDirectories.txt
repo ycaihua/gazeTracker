@@ -1,0 +1,1 @@
+/home/manasi/Documents/opencvstuff/Day10/build/CMakeFiles/pupil.dir

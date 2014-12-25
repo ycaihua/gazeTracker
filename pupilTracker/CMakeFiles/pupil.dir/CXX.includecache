@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/manasi/Documents/opencvstuff/Day10/pupil.cpp
+opencv2/objdetect/objdetect.hpp
+/home/manasi/Documents/opencvstuff/Day10/opencv2/objdetect/objdetect.hpp
+opencv2/highgui/highgui.hpp
+/home/manasi/Documents/opencvstuff/Day10/opencv2/highgui/highgui.hpp
+opencv2/imgproc/imgproc.hpp
+/home/manasi/Documents/opencvstuff/Day10/opencv2/imgproc/imgproc.hpp
+iostream
+-
+stdio.h
+-
+
