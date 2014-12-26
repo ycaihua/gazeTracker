@@ -3,3 +3,4 @@
 
 CMakeFiles/main.dir/main.cpp.o
  /home/manasi/gazeTracker/gaze/main.cpp
+ /usr/include/opencv/highgui.h

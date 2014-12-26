@@ -3,9 +3,12 @@
 
 
 #include <iostream>
+#include <highgui.h>
+//#include <QtGUI/QApplication>
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/objdetect/objdetect.hpp"
+#include <stdio.h>
 
 using namespace cv;
 using namespace std;
@@ -13,8 +16,8 @@ using namespace std;
 
 
 /*function Headers*/
-void markerDetect(Mat image); //check this
-void pupilDetect( Mat gray, Mat background);
+int markerDetect(Mat image); //check this
+int pupilDetect( Mat eyeROI);
 void detectAndDisplay( Mat frame );
 
 /*Global variables*/
@@ -27,14 +30,24 @@ void detectAndDisplay( Mat frame );
 	int iLowV = 0;
 	int iHighV = 255;
 
+	int thresh=0;  // threshold variable for trackbar
+	int flag=0;  // to return from function marker Detect
+
+
 /*Function Definition*/
-void markerDetect( Mat image)
+int markerDetect( Mat image)  // used to detect the marker placed on forhead for gaze vector quantification
 {
-	
-	namedWindow("Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
+	Moments mu;
+	int xCen, yCen;
+
+	Mat imgHSV;
+	Mat imgThresholded;
+	cvtColor(image, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
 
 	
+	//Thresholding part starts
 	
+	namedWindow("Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
 	//Create trackbars in "Control" window
 	cvCreateTrackbar("LowH", "Control", &iLowH, 179); //Hue (0 - 179)
 	cvCreateTrackbar("HighH", "Control", &iHighH, 179);
@@ -44,17 +57,15 @@ void markerDetect( Mat image)
 	
 	cvCreateTrackbar("LowV", "Control", &iLowV, 255); //Value (0 - 255)
 	cvCreateTrackbar("HighV", "Control", &iHighV, 255);
-	
-	Moments mu;
-	int xCen, yCen;
+	cvCreateTrackbar("finalize", "Control", &flag, 1);
 
-	Mat imgHSV;
-	Mat imgThresholded;
-
-	cvtColor(image, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
 	//Thresholding the image
 	inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded);
-      
+        //Thresholding part ended
+
+
+	//Centroid calculation starts
+	
 	//morphological opening (remove small objects from the foreground)
 	erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 	dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) ); 
@@ -69,80 +80,111 @@ void markerDetect( Mat image)
 	cout<<xCen<<"\t";
 	cout<<yCen<<endl;
 
+	//Centroid calculation ends
+
+
 	imshow("Thresholded Image", imgThresholded); //show the thresholded image
 	imshow("Original", image); //show the original image
-			
+	
+
+	//Closing all the windows
+	if (flag==1)
+	{
+	destroyWindow("Control");
+	destroyWindow("Thresholded Image");
+	destroyWindow("Original");
+	return xCen,yCen;
+	
+	}	
 }
 
 
 
-
-/*void pupildetect(Mat frame, Mat background)
-{
-
- String eyes_cascade_name = "haarcascade_eye_tree_eyeglasses.xml";
- CascadeClassifier eyes_cascade;
- string window_name = "Capture - Face detection";
- RNG rng(12345);
- int thresh=0;  // threshold variable for trackbar
-
-	void onTrack(int)  // callback func for track bar
+void onTrack(int)  // callback func for track bar
 	{
 		//cout<<thresh;
 	}	
+
+
+
+
+int pupilDetect(Mat frame)
+{
+ 
+Mat frame_gray;  // gray_scale image
+string window_name = "Capture - Face detection";
+vector<Rect> eyes;  // vector of segmented eyes
+Mat eyeROI;   		// Region of interesti.e. eyes
+Moments mu;
+int xCen;
+int yCen;
+// RNG rng(12345);
+	
+    if( !frame.empty() )
+    { 
+	cvtColor( frame, frame_gray, CV_BGR2GRAY );
+	equalizeHist( frame_gray, frame_gray );   // pre processing
+
 	//-- 1. Load the cascades
-   
-	   if( !eyes_cascade.load( eyes_cascade_name ) ){ printf("--(!)Error loading eye\n"); return -1; };
-	  if( !frame.empty() )
-       { detectAndDisplay( frame ); }
-       else
-       { printf(" --(!) No captured frame -- Break!"); break; }
+   	String eyes_cascade_name = "haarcascade_eye_tree_eyeglasses.xml";
+ 	CascadeClassifier eyes_cascade;
+	if( !eyes_cascade.load( eyes_cascade_name ) )
+		{ 
+		printf("--(!)Error loading eye\n"); 
+		}
 
-	void detectAndDisplay( Mat frame )
-	{
-	  vector<Rect> eyes;
-	  Mat frame_gray;
+	//-- Detect eyes
+	eyes_cascade.detectMultiScale( frame_gray, eyes, 1.1, 2, 0 |CV_HAAR_SCALE_IMAGE, Size(30, 30) );    
+	
+	for( size_t j = 0; j < eyes.size(); j++ )     //draw circle around every detected eye
+		{
+		eyeROI = frame_gray( eyes[j] );
+	        Point center( eyes[j].x + eyes[j].width*0.5, eyes[j].y + eyes[j].height*0.5 );
+	        int radius = cvRound( (eyes[j].width + eyes[j].height)*0.25 );
+	        circle( frame, center, radius, Scalar( 255, 0, 0 ), 4, 8, 0 );
+	
+		imshow("eyes", eyeROI);
+		namedWindow("pupil Thresholding",CV_WINDOW_AUTOSIZE);	
+		
+		cvCreateTrackbar("Thresh", "pupil Thresholding", &thresh, 255,onTrack); //grayThreshold (0 - 255)
+		cv::threshold(eyeROI, eyeROI, thresh, 255, cv::THRESH_BINARY);	
+	
+		//morphological opening (remove small objects from the foreground)
+		erode(eyeROI, eyeROI, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+		dilate( eyeROI, eyeROI, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) ); 
 
-	  cvtColor( frame, frame_gray, CV_BGR2GRAY );
-	  equalizeHist( frame_gray, frame_gray );
+		//morphological closing (fill small holes in the foreground)
+		dilate( eyeROI, eyeROI, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) ); 
+		erode(eyeROI, eyeROI, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 
-	  //-- Detect eyes
-		eyes_cascade.detectMultiScale( frame_gray, eyes, 1.1, 2, 0 |CV_HAAR_SCALE_IMAGE, Size(30, 30) );    
+		mu = moments(eyeROI);
+		xCen = mu.m10/mu.m00;
+		yCen = mu.m01/mu.m00;
+		cout<<xCen<<"\t";
+		cout<<yCen<<endl;
 	
-    
+		cv::imshow("eyeROI", eyeROI);		
 
-		    for( size_t j = 0; j < eyes.size(); j++ )
-		     {
-			Mat eyeROI = frame_gray( eyes[j] );
-		        Point center( eyes[j].x + eyes[j].width*0.5, eyes[j].y + eyes[j].height*0.5 );
-		        int radius = cvRound( (eyes[j].width + eyes[j].height)*0.25 );
-		        circle( frame, center, radius, Scalar( 255, 0, 0 ), 4, 8, 0 );
-	
-	
-	
-			imshow("eyes", eyeROI);
-			pupilDetect(eyeROI,frame_gray);
-			//cout<< xmin;
-			//cout<<ymin;
-	 
+		//cout<< xmin;
+		//cout<<ymin;
+	 	return xCen,yCen;
 		//-- Show what you got
-  			imshow( window_name, frame );
-			}
+		imshow( window_name, frame );
+		}
   
-	}
-
+    }
+    else
+    {
+    printf(" --(!) No frame loaded(!)--");
+    }
 
 }
-
-*/
-
-
-
-
 
 
 int main( int argc, char** argv )
 {
+	int MXcen,MYcen=0;
+	int PXcen,PYcen=0;
  	VideoCapture cap(0); //capture the video from web cam
 	if ( !cap.isOpened() )  // if not success, exit program
  	{
@@ -161,10 +203,13 @@ int main( int argc, char** argv )
 	             cout << "Cannot read a frame from video stream" << endl;
 	             break;
 	        }
-				
-		markerDetect(imgOriginal);
-
-
+			
+			MXcen,MYcen = markerDetect(imgOriginal);
+			cout << MXcen + MYcen << endl;
+			//PXcen,PYcen = pupilDetect(imagOriginal);
+			//cout << PXcen + PYcen << endl;	
+		//pupilDetect(imgOriginal);
+		
 	        if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
        			{
         		    cout << "esc key is pressed by user" << endl;
