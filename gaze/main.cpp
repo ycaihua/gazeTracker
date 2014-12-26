@@ -17,15 +17,7 @@ void markerDetect(Mat image); //check this
 void pupilDetect( Mat gray, Mat background);
 void detectAndDisplay( Mat frame );
 
-
-
-
-/*Function Definition*/
-void markerDetect( Mat image)
-{
-	
-	namedWindow("Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
-
+/*Global variables*/
 	int iLowH = 0;
 	int iHighH = 179;
 	
@@ -34,6 +26,14 @@ void markerDetect( Mat image)
 	
 	int iLowV = 0;
 	int iHighV = 255;
+
+/*Function Definition*/
+void markerDetect( Mat image)
+{
+	
+	namedWindow("Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
+
+	
 	
 	//Create trackbars in "Control" window
 	cvCreateTrackbar("LowH", "Control", &iLowH, 179); //Hue (0 - 179)
@@ -77,7 +77,7 @@ void markerDetect( Mat image)
 
 
 
-void pupildetect()
+/*void pupildetect(Mat frame, Mat background)
 {
 
  String eyes_cascade_name = "haarcascade_eye_tree_eyeglasses.xml";
@@ -134,7 +134,7 @@ void pupildetect()
 
 }
 
-
+*/
 
 
 
