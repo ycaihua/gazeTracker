@@ -1,0 +1,16 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/manasi/gazeTracker/markerTracker/markerdetect.cpp
+iostream
+-
+opencv2/highgui/highgui.hpp
+/home/manasi/gazeTracker/markerTracker/opencv2/highgui/highgui.hpp
+opencv2/imgproc/imgproc.hpp
+/home/manasi/gazeTracker/markerTracker/opencv2/imgproc/imgproc.hpp
+
