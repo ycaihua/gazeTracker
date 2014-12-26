@@ -23,7 +23,7 @@
  /** @function main */
  int main( int argc, const char** argv )
  {
-	
+
    CvCapture* capture;
    Mat frame;
 
@@ -93,13 +93,13 @@ void detectAndDisplay( Mat frame )
 	//Point p2(xmin,ymax);
 	//Point p4(xmax,ymin);
 	//rectangle(frame,p1,p2,255,1);
-	
+
 		Mat eyes (frame_gray, Rect(xmin, ymin, 2*radius, 2*radius) );
 		imshow("leyes", eyes);
 		pupilDetect(eyes,frame_gray);
 	//cout<< xmin;
 	//cout<<ymin;
-	
+
 //-- Show what you got
   imshow( window_name, frame );
 	}
@@ -107,18 +107,18 @@ void detectAndDisplay( Mat frame )
 }
 void pupilDetect(Mat gray, Mat background)
 {
-	Moments mu;	
+	Moments mu;
 	int xCen;
-	int yCen;	
+	int yCen;
 	// Convert to binary image by thresholding it
-	cv::threshold(gray, gray, 150, 255, cv::THRESH_BINARY);	
-	
+	cv::threshold(gray, gray, 150, 255, cv::THRESH_BINARY);
+
 	//morphological opening (remove small objects from the foreground)
 	erode(gray, gray, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-	dilate( gray, gray, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) ); 
+	dilate( gray, gray, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 
 	//morphological closing (fill small holes in the foreground)
-	dilate( gray, gray, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) ); 
+	dilate( gray, gray, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 	erode(gray, gray, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 
 	mu = moments(gray);
@@ -126,10 +126,6 @@ void pupilDetect(Mat gray, Mat background)
 	yCen = mu.m01/mu.m00;
 	cout<<xCen<<"\t";
 	cout<<yCen<<endl;
-	
+
 	cv::imshow("image", gray);
 }
-
-  
-
-
