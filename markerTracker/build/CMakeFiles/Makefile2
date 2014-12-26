@@ -47,44 +47,44 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/manasi/Documents/opencvstuff/Day8
+CMAKE_SOURCE_DIR = /home/manasi/Documents/opencvstuff/Day9
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/manasi/Documents/opencvstuff/Day8/build
+CMAKE_BINARY_DIR = /home/manasi/Documents/opencvstuff/Day9/build
 
 #=============================================================================
-# Target rules for target CMakeFiles/pupildetect.dir
+# Target rules for target CMakeFiles/markerdetect.dir
 
 # All Build rule for target.
-CMakeFiles/pupildetect.dir/all:
-	$(MAKE) -f CMakeFiles/pupildetect.dir/build.make CMakeFiles/pupildetect.dir/depend
-	$(MAKE) -f CMakeFiles/pupildetect.dir/build.make CMakeFiles/pupildetect.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/manasi/Documents/opencvstuff/Day8/build/CMakeFiles  1
-	@echo "Built target pupildetect"
-.PHONY : CMakeFiles/pupildetect.dir/all
+CMakeFiles/markerdetect.dir/all:
+	$(MAKE) -f CMakeFiles/markerdetect.dir/build.make CMakeFiles/markerdetect.dir/depend
+	$(MAKE) -f CMakeFiles/markerdetect.dir/build.make CMakeFiles/markerdetect.dir/build
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/manasi/Documents/opencvstuff/Day9/build/CMakeFiles  1
+	@echo "Built target markerdetect"
+.PHONY : CMakeFiles/markerdetect.dir/all
 
 # Include target in all.
-all: CMakeFiles/pupildetect.dir/all
+all: CMakeFiles/markerdetect.dir/all
 .PHONY : all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/pupildetect.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/manasi/Documents/opencvstuff/Day8/build/CMakeFiles 1
-	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/pupildetect.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/manasi/Documents/opencvstuff/Day8/build/CMakeFiles 0
-.PHONY : CMakeFiles/pupildetect.dir/rule
+CMakeFiles/markerdetect.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/manasi/Documents/opencvstuff/Day9/build/CMakeFiles 1
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/markerdetect.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/manasi/Documents/opencvstuff/Day9/build/CMakeFiles 0
+.PHONY : CMakeFiles/markerdetect.dir/rule
 
 # Convenience name for target.
-pupildetect: CMakeFiles/pupildetect.dir/rule
-.PHONY : pupildetect
+markerdetect: CMakeFiles/markerdetect.dir/rule
+.PHONY : markerdetect
 
 # clean rule for target.
-CMakeFiles/pupildetect.dir/clean:
-	$(MAKE) -f CMakeFiles/pupildetect.dir/build.make CMakeFiles/pupildetect.dir/clean
-.PHONY : CMakeFiles/pupildetect.dir/clean
+CMakeFiles/markerdetect.dir/clean:
+	$(MAKE) -f CMakeFiles/markerdetect.dir/build.make CMakeFiles/markerdetect.dir/clean
+.PHONY : CMakeFiles/markerdetect.dir/clean
 
 # clean rule for target.
-clean: CMakeFiles/pupildetect.dir/clean
+clean: CMakeFiles/markerdetect.dir/clean
 .PHONY : clean
 
 #=============================================================================

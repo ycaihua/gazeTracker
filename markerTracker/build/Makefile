@@ -39,10 +39,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/manasi/Documents/opencvstuff/Day8
+CMAKE_SOURCE_DIR = /home/manasi/Documents/opencvstuff/Day9
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/manasi/Documents/opencvstuff/Day8/build
+CMAKE_BINARY_DIR = /home/manasi/Documents/opencvstuff/Day9/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -69,9 +69,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/manasi/Documents/opencvstuff/Day8/build/CMakeFiles /home/manasi/Documents/opencvstuff/Day8/build/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/manasi/Documents/opencvstuff/Day9/build/CMakeFiles /home/manasi/Documents/opencvstuff/Day9/build/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/manasi/Documents/opencvstuff/Day8/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/manasi/Documents/opencvstuff/Day9/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -99,41 +99,41 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named pupildetect
+# Target rules for targets named markerdetect
 
 # Build rule for target.
-pupildetect: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 pupildetect
-.PHONY : pupildetect
+markerdetect: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 markerdetect
+.PHONY : markerdetect
 
 # fast build rule for target.
-pupildetect/fast:
-	$(MAKE) -f CMakeFiles/pupildetect.dir/build.make CMakeFiles/pupildetect.dir/build
-.PHONY : pupildetect/fast
+markerdetect/fast:
+	$(MAKE) -f CMakeFiles/markerdetect.dir/build.make CMakeFiles/markerdetect.dir/build
+.PHONY : markerdetect/fast
 
-pupildetect.o: pupildetect.cpp.o
-.PHONY : pupildetect.o
+markerdetect.o: markerdetect.cpp.o
+.PHONY : markerdetect.o
 
 # target to build an object file
-pupildetect.cpp.o:
-	$(MAKE) -f CMakeFiles/pupildetect.dir/build.make CMakeFiles/pupildetect.dir/pupildetect.cpp.o
-.PHONY : pupildetect.cpp.o
+markerdetect.cpp.o:
+	$(MAKE) -f CMakeFiles/markerdetect.dir/build.make CMakeFiles/markerdetect.dir/markerdetect.cpp.o
+.PHONY : markerdetect.cpp.o
 
-pupildetect.i: pupildetect.cpp.i
-.PHONY : pupildetect.i
+markerdetect.i: markerdetect.cpp.i
+.PHONY : markerdetect.i
 
 # target to preprocess a source file
-pupildetect.cpp.i:
-	$(MAKE) -f CMakeFiles/pupildetect.dir/build.make CMakeFiles/pupildetect.dir/pupildetect.cpp.i
-.PHONY : pupildetect.cpp.i
+markerdetect.cpp.i:
+	$(MAKE) -f CMakeFiles/markerdetect.dir/build.make CMakeFiles/markerdetect.dir/markerdetect.cpp.i
+.PHONY : markerdetect.cpp.i
 
-pupildetect.s: pupildetect.cpp.s
-.PHONY : pupildetect.s
+markerdetect.s: markerdetect.cpp.s
+.PHONY : markerdetect.s
 
 # target to generate assembly for a file
-pupildetect.cpp.s:
-	$(MAKE) -f CMakeFiles/pupildetect.dir/build.make CMakeFiles/pupildetect.dir/pupildetect.cpp.s
-.PHONY : pupildetect.cpp.s
+markerdetect.cpp.s:
+	$(MAKE) -f CMakeFiles/markerdetect.dir/build.make CMakeFiles/markerdetect.dir/markerdetect.cpp.s
+.PHONY : markerdetect.cpp.s
 
 # Help Target
 help:
@@ -142,11 +142,11 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
-	@echo "... pupildetect"
+	@echo "... markerdetect"
 	@echo "... rebuild_cache"
-	@echo "... pupildetect.o"
-	@echo "... pupildetect.i"
-	@echo "... pupildetect.s"
+	@echo "... markerdetect.o"
+	@echo "... markerdetect.i"
+	@echo "... markerdetect.s"
 .PHONY : help
 
 
