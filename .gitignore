@@ -1,3 +1,3 @@
-/home/stark/gazeTracker/pupilTracker/build
-/home/stark/gazeTracker/markerTracker/build
-/home/stark/gazeTracker/gaze/build
+pupilTracker/build/*
+markerTracker/build/*
+gaze/build/*
