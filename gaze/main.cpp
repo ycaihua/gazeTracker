@@ -4,7 +4,6 @@
 
 #include <iostream>
 #include <highgui.h>
-//#include <QtGUI/QApplication>
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/objdetect/objdetect.hpp"
@@ -44,7 +43,6 @@ int markerDetect( Mat image)  // used to detect the marker placed on forhead for
 	Mat imgThresholded;
 	cvtColor(image, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
 
-	
 	//Thresholding part starts
 	
 	namedWindow("Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
@@ -62,8 +60,7 @@ int markerDetect( Mat image)  // used to detect the marker placed on forhead for
 	//Thresholding the image
 	inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded);
         //Thresholding part ended
-
-
+	//flag=1;
 	//Centroid calculation starts
 	
 	//morphological opening (remove small objects from the foreground)
@@ -94,7 +91,6 @@ int markerDetect( Mat image)  // used to detect the marker placed on forhead for
 	destroyWindow("Thresholded Image");
 	destroyWindow("Original");
 	return xCen,yCen;
-	
 	}	
 }
 
@@ -206,9 +202,9 @@ int main( int argc, char** argv )
 			
 			MXcen,MYcen = markerDetect(imgOriginal);
 			cout << MXcen + MYcen << endl;
-			//PXcen,PYcen = pupilDetect(imagOriginal);
-			//cout << PXcen + PYcen << endl;	
-		//pupilDetect(imgOriginal);
+			PXcen,PYcen = pupilDetect(imgOriginal);
+			cout << PXcen + PYcen << endl;	
+			//pupilDetect(imgOriginal);
 		
 	        if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
        			{
