@@ -4,7 +4,7 @@ SET(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 SET(CMAKE_DEPENDS_CHECK_CXX
-  "/home/manasi/gazeTracker/gaze/main.cpp" "/home/manasi/gazeTracker/gaze/build/CMakeFiles/main.dir/main.cpp.o"
+  "/home/stark/gazeTracker/gaze/main.cpp" "/home/stark/gazeTracker/gaze/build/CMakeFiles/main.dir/main.cpp.o"
   )
 SET(CMAKE_CXX_COMPILER_ID "GNU")
 

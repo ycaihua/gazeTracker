@@ -6,13 +6,13 @@
 
 #IncludeRegexTransform: 
 
-/home/manasi/gazeTracker/gaze/main.cpp
+/home/stark/gazeTracker/gaze/main.cpp
 iostream
 -
 opencv2/highgui/highgui.hpp
-/home/manasi/gazeTracker/gaze/opencv2/highgui/highgui.hpp
+/home/stark/gazeTracker/gaze/opencv2/highgui/highgui.hpp
 opencv2/imgproc/imgproc.hpp
-/home/manasi/gazeTracker/gaze/opencv2/imgproc/imgproc.hpp
+/home/stark/gazeTracker/gaze/opencv2/imgproc/imgproc.hpp
 opencv2/objdetect/objdetect.hpp
-/home/manasi/gazeTracker/gaze/opencv2/objdetect/objdetect.hpp
+/home/stark/gazeTracker/gaze/opencv2/objdetect/objdetect.hpp
 

@@ -1,1 +1,1 @@
-/home/manasi/gazeTracker/gaze/build/CMakeFiles/main.dir
+/home/stark/gazeTracker/gaze/build/CMakeFiles/main.dir
