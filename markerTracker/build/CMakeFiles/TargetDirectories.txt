@@ -1,1 +1,0 @@
-/home/manasi/gazeTracker/markerTracker/build/CMakeFiles/markerdetect.dir
