@@ -27,6 +27,7 @@ int iHighV = 255;
 
 int thresh=0;  // threshold variable for trackbar
 int flag=0;  // to return from function marker Detect
+int calibration_pts=2;
 
 /*Function Definition*/
 
@@ -137,7 +138,7 @@ int pupilDetect(Mat frame)
 				return xCen,yCen;
 				//-- Show what you got
 				imshow( window_name, frame );
-			}
+			 }
 
 		}
 		else
@@ -150,10 +151,12 @@ int pupilDetect(Mat frame)
 
 int main( int argc, char** argv )
 	{
-		int MXcen,MYcen=0;
-		int PXcen,PYcen=0;
+		int mx,my=0;
+		int px,py=0;
 		VideoCapture cap(0); //capture the video from web cam
 		Mat imgOriginal;     //image object
+		int vx[2]={0};
+		int vy[2]={0};
 
 		if ( !cap.isOpened() )  // if not success, exit program
 		{
@@ -161,7 +164,7 @@ int main( int argc, char** argv )
 			return -1;
 		}
 
-		while(true)
+		while(true)    // marker detection
 		{
 
 			bool bSuccess = cap.read(imgOriginal); // read a new frame from video
@@ -188,7 +191,7 @@ int main( int argc, char** argv )
 
 			if (flag==0)
 				{
-					MXcen,MYcen = markerDetect(imgOriginal);
+					mx,my = markerDetect(imgOriginal);
 				}
 			//Closing all the windows
 			else if (flag==1)
@@ -196,7 +199,7 @@ int main( int argc, char** argv )
 				destroyWindow("Control");
 				destroyWindow("Thresholded Image");
 				destroyWindow("Original");
-				cout << MXcen << " " << MYcen << endl;  //print the centrois of marker
+				cout << mx << " " << my << endl;  //print the centrois of marker
 				flag=0;
 				break;
 				}
@@ -209,7 +212,7 @@ int main( int argc, char** argv )
 			}
 		}
 
-		while(true)
+		while(true)   // pupil thresholding
 		{
 			bool bSuccess = cap.read(imgOriginal); // read a new frame from video
 
@@ -220,16 +223,18 @@ int main( int argc, char** argv )
 			}
 			namedWindow("pupil Thresholding",CV_WINDOW_AUTOSIZE);
 			cvCreateTrackbar("Thresh", "pupil Thresholding", &thresh, 255,onTrack); // create a trackbar for pupil thresholding - grayThreshold (0 - 255)
+			cvCreateTrackbar("finalize", "pupil Thresholding", &flag, 1);
 
 			if(flag==0)
-			PXcen,PYcen = pupilDetect(imgOriginal);
+			px,py = pupilDetect(imgOriginal);
 			else
 			{
 			destroyWindow("pupil Thresholding");
 			destroyWindow("eyes");
 			destroyWindow("eyeROI");
 			destroyWindow("original image");
-			cout << PXcen << " " << PYcen << endl;
+			cout << px << " " << py << endl;
+			flag=0;
 			break;
 			}
 
@@ -241,5 +246,35 @@ int main( int argc, char** argv )
 
 		}
 
+
+		for(int i=0;i<calibration_pts;i++)
+		{
+
+			while(true)
+			{
+					bool bSuccess = cap.read(imgOriginal); // read a new frame from video
+					if (!bSuccess) //if not success, break loop
+					{
+						cout << "Cannot read a frame from video stream" << endl;
+						break;
+					}
+
+			namedWindow("calibration1",CV_WINDOW_AUTOSIZE);
+			cvCreateTrackbar("finalize", "calibration1", &flag, 1,onTrack); // create a trackbar for pupil thresholding - grayThreshold (0 - 255)
+
+			if (flag==0)
+			{
+				px,py = pupilDetect(imgOriginal);
+				vx[i] = mx - px;
+				vy[i] = my - py;
+				cout << "vx[i] : " << vx[i] << " " << "vy[i] : " <<  vy[i] << endl;
+			}
+			else
+			{
+				break;
+			}
+		}
+
+	}
 	return 0;
 	}
