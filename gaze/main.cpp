@@ -14,6 +14,7 @@ using namespace std;
 int markerDetect(Mat image); //check this
 int pupilDetect( Mat eyeROI);
 void detectAndDisplay( Mat frame );
+void calibration();
 
 /*Global variables*/
 int iLowH = 0;
@@ -27,7 +28,17 @@ int iHighV = 255;
 
 int thresh=0;  // threshold variable for trackbar
 int flag=0;  // to return from function marker Detect
+
+//calibration global var
 int calibration_pts=2;
+float half_width=10.0;
+float half_length=17.0;
+int vx[2]={0};
+int vy[2]={0};
+float thetah[2]={0,-half_width};
+float thetav[2]={0,half_length};
+
+float b1,b2,a1,a2;
 
 /*Function Definition*/
 
@@ -63,8 +74,8 @@ int markerDetect( Mat image)  // used to detect the marker placed on forhead for
 		mu = moments(imgThresholded);
 		xCen = mu.m10/mu.m00;
 		yCen = mu.m01/mu.m00;
-		cout<<xCen<<"\t";
-		cout<<yCen<<endl;
+		//cout<<xCen<<"\t";
+		//cout<<yCen<<endl;
 
 		//Centroid calculation ends
 
@@ -128,8 +139,8 @@ int pupilDetect(Mat frame)
 				mu = moments(eyeROI);
 				xCen = mu.m10/mu.m00;
 				yCen = mu.m01/mu.m00;
-				cout<<xCen<<"\t";
-				cout<<yCen<<endl;
+			//	cout<<xCen<<"\t";
+		//		cout<<yCen<<endl;
 
 				cv::imshow("eyeROI", eyeROI);
 
@@ -148,15 +159,29 @@ int pupilDetect(Mat frame)
 
 	}
 
+void calibration()
+{
+	b1 = ((thetah[1] - thetah[2])/(float)(vx[1]-vx[2]));
+	a1 = ((vx[1]*thetah[2]-thetah[1]*vx[2])/(float)(vx[1]-vx[2]));
 
+	b2 = ((thetav[1] - thetav[2])/(float)(vy[1]-vy[2]));
+	a2 = ((vy[1]*thetav[2]-thetav[1]*vy[2])/(float)(vy[1]-vy[2]));
+
+	cout << "b1= "<<b1<<" a1= "<<a1<<"b2= "<<b2<<" a2= "<<a2;
+
+
+
+}
 int main( int argc, char** argv )
 	{
 		int mx,my=0;
 		int px,py=0;
 		VideoCapture cap(0); //capture the video from web cam
 		Mat imgOriginal;     //image object
-		int vx[2]={0};
-		int vy[2]={0};
+
+		//realtime tracking vars
+		float thetah,thetav; //
+		int vx_local,vy_local;           // eye-marker vector
 
 		if ( !cap.isOpened() )  // if not success, exit program
 		{
@@ -259,22 +284,57 @@ int main( int argc, char** argv )
 						break;
 					}
 
-			namedWindow("calibration1",CV_WINDOW_AUTOSIZE);
-			cvCreateTrackbar("finalize", "calibration1", &flag, 1,onTrack); // create a trackbar for pupil thresholding - grayThreshold (0 - 255)
+					namedWindow("calibration1",CV_WINDOW_AUTOSIZE);
+					cvCreateTrackbar("finalize", "calibration1", &flag, 1,onTrack); // create a trackbar for pupil thresholding - grayThreshold (0 - 255)
 
-			if (flag==0)
-			{
-				px,py = pupilDetect(imgOriginal);
-				vx[i] = mx - px;
-				vy[i] = my - py;
-				cout << "vx[i] : " << vx[i] << " " << "vy[i] : " <<  vy[i] << endl;
+					if (flag==0)
+					{
+						px,py = pupilDetect(imgOriginal);
+						vx[i] = mx - px;
+						vy[i] = my - py;
+						cout << "vx[i] : " << vx[i] << " " << "vy[i] : " <<  vy[i] << endl;
+					}
+					else
+					{
+						flag=0;
+						break;
+					}
+
+					if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
+					{
+						cout << "esc key is pressed by user" << endl;
+						break;
+					}
 			}
-			else
-			{
-				break;
-			}
+
 		}
 
-	}
+		calibration();  // calibrate
+
+		while(true)
+		{
+				bool bSuccess = cap.read(imgOriginal); // read a new frame from video
+				if (!bSuccess) //if not success, break loop
+				{
+					cout << "Cannot read a frame from video stream" << endl;
+					break;
+				}
+
+				mx,my = markerDetect(imgOriginal);
+				px,py = pupilDetect(imgOriginal);
+				vx_local = mx - px;
+				vy_local = my - py;
+				thetah = b1*vx_local + a1;
+				thetav = b2*vy_local + a2;
+				cout << " Thetav= "<<thetav<<" Thetav="<<thetah;
+
+				if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
+				{
+					cout << "esc key is pressed by user" << endl;
+					break;
+				}
+		}
+
+
 	return 0;
 	}
