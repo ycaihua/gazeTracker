@@ -11,8 +11,8 @@ using namespace cv;
 using namespace std;
 
 /*function Headers*/
-int markerDetect(Mat image); //check this
-int pupilDetect( Mat eyeROI);
+//int markerDetect(Mat image); //check this
+//int pupilDetect( Mat eyeROI);
 void detectAndDisplay( Mat frame );
 void calibration();
 
@@ -28,6 +28,14 @@ int iHighV = 255;
 
 int thresh=39;  // threshold variable for trackbar
 int flag=0;  // to return from function marker Detect
+//int mx,my=0;
+//int px,py=0;
+
+typedef struct center   // structure for marker centroids
+{
+	int x=0;
+	int y=0;
+};
 
 //calibration global var
 int calibration_pts=2;
@@ -38,7 +46,7 @@ float length = 2*half_length;
 int vx[2]={0};
 int vy[2]={0};
 float thetah[2]={0,half_length};
-float thetav[2]={0,-width};
+float thetav[2]={0,0};
 
 float b1,b2,a1,a2;
 
@@ -49,10 +57,11 @@ void onTrack(int)  // callback func for track bar
 		//cout<<thresh;
 	}
 
-int markerDetect( Mat image)  // used to detect the marker placed on forhead for gaze vector quantification
+center markerDetect( Mat image)  // used to detect the marker placed on forhead for gaze vector quantification
 	{
 		Moments mu;
 		int xCen, yCen;
+		center mcen;
 
 		Mat imgHSV;
 		Mat imgThresholded;
@@ -85,11 +94,15 @@ int markerDetect( Mat image)  // used to detect the marker placed on forhead for
 		imshow("Thresholded Image", imgThresholded); //show the thresholded image
 		//imshow("Original", image); //show the original image
 
-		return xCen,yCen;
+
+		mcen.x = xCen;
+		mcen.y = yCen;
+
+		return mcen;
 
 	}
 
-int pupilDetect(Mat frame)
+center pupilDetect(Mat frame)
 	{
 		Mat frame_gray;  // gray_scale image
 		string window_name = "Capture - Face detection";
@@ -98,6 +111,8 @@ int pupilDetect(Mat frame)
 		Moments mu;
 		int xCen;
 		int yCen;
+		center pcen;
+
 		// RNG rng(12345);
 
 		if( !frame.empty() )
@@ -143,17 +158,20 @@ int pupilDetect(Mat frame)
 				mu = moments(eyeROI);
 				xCen = mu.m10/mu.m00;
 				yCen = mu.m01/mu.m00;
-			//	cout<<xCen<<"\t";
-		//		cout<<yCen<<endl;
+				//cout<<xCen<<"\t";
+				//cout<<yCen<<endl;
 
 				cv::imshow("eyeROI", eyeROI);
 
 				//cout<< xmin;
 				//cout<<ymin;
-				return xCen,yCen;
-				//-- Show what you got
-				imshow( window_name, frame );
-			}
+
+					pcen.x=xCen;
+					pcen.y=yCen;
+					return pcen;
+					//-- Show what you got
+					imshow( window_name, frame );
+				}
 
 		}
 		else
@@ -172,20 +190,21 @@ void calibration()
 	a2 = ((vy[1]*thetav[2]-thetav[1]*vy[2])/(float)(vy[1]-vy[2]));
 
 	cout << "b1= "<<b1<<" a1= "<<a1<<"b2= "<<b2<<" a2= "<<a2;
-
-
-
 }
+
 int main( int argc, char** argv )
 	{
-		int mx,my=0;
-		int px,py=0;
-		VideoCapture cap(0); //capture the video from web cam
-		Mat imgOriginal;     //image object
+		//int mx,my=0;
+		//int px,py=0;
+		center mcen;
+		center pcen;
 
 		//realtime tracking vars
 		float thetah,thetav=0; //
 		int vx_local,vy_local;           // eye-marker vector
+
+		VideoCapture cap(0); //capture the video from web cam
+		Mat imgOriginal;     //image object
 
 		if ( !cap.isOpened() )  // if not success, exit program
 		{
@@ -220,8 +239,8 @@ int main( int argc, char** argv )
 
 			if (flag==0)
 				{
-					mx,my = markerDetect(imgOriginal);
-					cout<<"mx= "<<mx<<" my= "<<my<<endl;
+					mcen = markerDetect(imgOriginal);
+					cout<<"mcen.x= "<<mcen.x<<" mcen.y= "<<mcen.y<<endl;
 				}
 			//Closing all the windows
 			else if (flag==1)
@@ -229,7 +248,7 @@ int main( int argc, char** argv )
 				destroyWindow("Control");
 				destroyWindow("Thresholded Image");
 				destroyWindow("Original");
-				cout << mx << " " << my << endl;  //print the centrois of marker
+				cout<<"mcen.x= "<<mcen.x<<" mcen.y= "<<mcen.y<<endl;  //print the centrois of marker
 				flag=0;
 				break;
 				}
@@ -256,14 +275,14 @@ int main( int argc, char** argv )
 			cvCreateTrackbar("finalize", "pupil Thresholding", &flag, 1);
 
 			if(flag==0)
-			px,py = pupilDetect(imgOriginal);
+			pcen = pupilDetect(imgOriginal);
 			else
 			{
 			destroyWindow("pupil Thresholding");
 			destroyWindow("eyes");
 			destroyWindow("eyeROI");
 			destroyWindow("original image");
-			cout << px << " " << py << endl;
+			cout << pcen.x << " " << pcen.y << endl;
 			flag=0;
 			break;
 			}
@@ -275,7 +294,6 @@ int main( int argc, char** argv )
 			}
 
 		}
-
 
 		for(int i=0;i<calibration_pts;i++)    //getting 2 vectors for calibration
 		{
@@ -294,9 +312,9 @@ int main( int argc, char** argv )
 
 					if (flag==0)
 					{
-						px,py = pupilDetect(imgOriginal);
-						vx[i] = mx - px;
-						vy[i] = my - py;
+						pcen = pupilDetect(imgOriginal);
+						vx[i] = mcen.x - pcen.x;
+						vy[i] = mcen.y - pcen.y;
 						cout << "vx[i] : " << vx[i] << " " << "vy[i] : " <<  vy[i] << endl;
 					}
 					else
@@ -312,7 +330,6 @@ int main( int argc, char** argv )
 						break;
 					}
 			}
-
 		}
 
 		calibration();  // calibrate
@@ -326,11 +343,11 @@ int main( int argc, char** argv )
 					break;
 				}
 
-				mx,my = markerDetect(imgOriginal);
-				px,py = pupilDetect(imgOriginal);
-				vx_local = mx - px;
-				vy_local = my - py;
-				cout<< "px= "<<px<<"mx= "<<mx;
+				mcen = markerDetect(imgOriginal);
+				pcen = pupilDetect(imgOriginal);
+				vx_local = mcen.x - pcen.x;
+				vy_local = mcen.y - pcen.y;
+				cout<< "pcen.x= "<<pcen.x<<"mcen.x= "<<mcen.x;
 				thetah = b1*vx_local + a1;
 				thetav = b2*vy_local + a2;
 				cout << " Thetah = "<<thetah <<" Thetav ="<<thetav << endl;
