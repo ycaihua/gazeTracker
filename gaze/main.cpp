@@ -17,26 +17,28 @@ void detectAndDisplay( Mat frame );
 void calibration();
 
 /*Global variables*/
-int iLowH = 0;
+int iLowH = 130;
 int iHighH = 179;
 
-int iLowS = 0;
+int iLowS = 90;
 int iHighS = 255;
 
-int iLowV = 0;
+int iLowV = 90;
 int iHighV = 255;
 
-int thresh=0;  // threshold variable for trackbar
+int thresh=39;  // threshold variable for trackbar
 int flag=0;  // to return from function marker Detect
 
 //calibration global var
 int calibration_pts=2;
-float half_width=10.0;
-float half_length=17.0;
+float half_width=10;
+float half_length=17;
+float width = 2*half_width;
+float length = 2*half_length;
 int vx[2]={0};
 int vy[2]={0};
-float thetah[2]={0,-half_width};
-float thetav[2]={0,half_length};
+float thetah[2]={0,half_length};
+float thetav[2]={0,-width};
 
 float b1,b2,a1,a2;
 
@@ -81,7 +83,7 @@ int markerDetect( Mat image)  // used to detect the marker placed on forhead for
 
 
 		imshow("Thresholded Image", imgThresholded); //show the thresholded image
-		imshow("Original", image); //show the original image
+		//imshow("Original", image); //show the original image
 
 		return xCen,yCen;
 
@@ -117,6 +119,7 @@ int pupilDetect(Mat frame)
 
 			for( size_t j = 0; j < eyes.size(); j++ )     //draw circle around every detected eye
 			{
+				//int j=0;
 				eyeROI = frame_gray( eyes[j] );
 				Point center( eyes[j].x + eyes[j].width*0.5, eyes[j].y + eyes[j].height*0.5 );
 				int radius = cvRound( (eyes[j].width + eyes[j].height)*0.25 );
@@ -126,7 +129,7 @@ int pupilDetect(Mat frame)
 
 
 
-				cv::threshold(eyeROI, eyeROI, thresh, 255, cv::THRESH_BINARY);
+				cv::threshold(eyeROI, eyeROI, thresh, 255, cv::THRESH_BINARY_INV);
 
 				//morphological opening (remove small objects from the foreground)
 				erode(eyeROI, eyeROI, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
@@ -135,6 +138,7 @@ int pupilDetect(Mat frame)
 				//morphological closing (fill small holes in the foreground)
 				dilate( eyeROI, eyeROI, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 				erode(eyeROI, eyeROI, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+
 
 				mu = moments(eyeROI);
 				xCen = mu.m10/mu.m00;
@@ -149,7 +153,7 @@ int pupilDetect(Mat frame)
 				return xCen,yCen;
 				//-- Show what you got
 				imshow( window_name, frame );
-			 }
+			}
 
 		}
 		else
@@ -180,7 +184,7 @@ int main( int argc, char** argv )
 		Mat imgOriginal;     //image object
 
 		//realtime tracking vars
-		float thetah,thetav; //
+		float thetah,thetav=0; //
 		int vx_local,vy_local;           // eye-marker vector
 
 		if ( !cap.isOpened() )  // if not success, exit program
@@ -217,6 +221,7 @@ int main( int argc, char** argv )
 			if (flag==0)
 				{
 					mx,my = markerDetect(imgOriginal);
+					cout<<"mx= "<<mx<<" my= "<<my<<endl;
 				}
 			//Closing all the windows
 			else if (flag==1)
@@ -272,7 +277,7 @@ int main( int argc, char** argv )
 		}
 
 
-		for(int i=0;i<calibration_pts;i++)
+		for(int i=0;i<calibration_pts;i++)    //getting 2 vectors for calibration
 		{
 
 			while(true)
@@ -284,8 +289,8 @@ int main( int argc, char** argv )
 						break;
 					}
 
-					namedWindow("calibration1",CV_WINDOW_AUTOSIZE);
-					cvCreateTrackbar("finalize", "calibration1", &flag, 1,onTrack); // create a trackbar for pupil thresholding - grayThreshold (0 - 255)
+					namedWindow("calibration",CV_WINDOW_AUTOSIZE);
+					cvCreateTrackbar("finalize", "calibration", &flag, 1,onTrack); // create a trackbar for pupil thresholding - grayThreshold (0 - 255)
 
 					if (flag==0)
 					{
@@ -297,6 +302,7 @@ int main( int argc, char** argv )
 					else
 					{
 						flag=0;
+						destroyWindow("calibration");
 						break;
 					}
 
@@ -311,7 +317,7 @@ int main( int argc, char** argv )
 
 		calibration();  // calibrate
 
-		while(true)
+		while(true)			// real time tracking
 		{
 				bool bSuccess = cap.read(imgOriginal); // read a new frame from video
 				if (!bSuccess) //if not success, break loop
@@ -324,9 +330,10 @@ int main( int argc, char** argv )
 				px,py = pupilDetect(imgOriginal);
 				vx_local = mx - px;
 				vy_local = my - py;
+				cout<< "px= "<<px<<"mx= "<<mx;
 				thetah = b1*vx_local + a1;
 				thetav = b2*vy_local + a2;
-				cout << " Thetav= "<<thetav<<" Thetav="<<thetah;
+				cout << " Thetah = "<<thetah <<" Thetav ="<<thetav << endl;
 
 				if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
 				{

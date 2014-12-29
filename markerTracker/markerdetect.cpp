@@ -23,7 +23,7 @@ using namespace std;
 int iLowH = 0;
 int iHighH = 179;
 
-int iLowS = 0; 
+int iLowS = 0;
 int iHighS = 255;
 
 int iLowV = 0;
@@ -61,13 +61,13 @@ cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from 
 Mat imgThresholded;
 
 inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded); //Threshold the image
-      
+
 //morphological opening (remove small objects from the foreground)
 erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) ); 
+dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 
 //morphological closing (fill small holes in the foreground)
-dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) ); 
+dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 
 mu = moments(imgThresholded);
@@ -82,12 +82,10 @@ imshow("Original", imgOriginal); //show the original image
         if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
        {
             cout << "esc key is pressed by user" << endl;
-            break; 
+            break;
        }
     }
 
    return 0;
 
 }
-
-
