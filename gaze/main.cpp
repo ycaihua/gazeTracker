@@ -117,7 +117,8 @@ center pupilDetect(Mat frame)
 		Mat frame_gray;  // gray_scale image
 		string window_name = "Capture - Face detection";
 		vector<Rect> eyes;  // vector of segmented eyes
-		Mat eyeROI;   		// Region of interesti.e. eyes
+		Mat eyeROI;
+		Mat eyeROI_thresh;		// Region of interesti.e. eyes
 		Moments mu;
 		int xCen;
 		int yCen;
@@ -145,17 +146,19 @@ center pupilDetect(Mat frame)
 			for( size_t j = 0; j < eyes.size(); j++ )     //draw circle around every detected eye
 			{
 				//int j=0;
-				//eyeROI = frame_gray( eyes[j] );			// extracting gray eyes from the gray scale image
-				eyeROI = frame( eyes[j] );            //extracting colored eyes form the original image
+				eyeROI = frame_gray( eyes[j] );			// extracting gray eyes from the gray scale image
+				//eyeROI = frame( eyes[j] );            //extracting colored eyes form the original image
 				Point center( eyes[j].x + eyes[j].width*0.5, eyes[j].y + eyes[j].height*0.5 );
 				int radius = cvRound( (eyes[j].width + eyes[j].height)*0.25 );
-				//circle( frame, center, radius, Scalar( 255, 0, 0 ), 4, 8, 0 );
+				circle( frame, center, 2*radius, Scalar( 255, 0, 0 ), 4, 8, 0 );
 				imshow("original image",frame);
 				imshow("eyes", eyeROI);
 
-				cvtColor(eyeROI, eyeROI, COLOR_BGR2HSV); //Convert the captured eyeROI from BGR to HSV
 				//cv::threshold(eyeROI, eyeROI, thresh, 255, cv::THRESH_BINARY_INV);    //binary thresholding of gray scale eyes
+				//cv::threshold(eyeROI, eyeROI, thresh, 255, cv::THRESH_BINARY_INV|CV_THRESH_OTSU);
+				Canny(eyeROI,eyeROI_thresh,iLowpH,iHighpH,3);
 
+				//cvtColor(eyeROI, eyeROI, COLOR_BGR2HSV); //Convert the captured eyeROI from BGR to HSV
 				inRange(eyeROI, Scalar(iLowpH, iLowpS, iLowpV), Scalar(iHighpH, iHighpS, iHighpV), eyeROI); // callback func for hsv thresholding using trackbars created in main
 
 				//morphological opening (remove small objects from the foreground)
@@ -166,6 +169,7 @@ center pupilDetect(Mat frame)
 				dilate( eyeROI, eyeROI, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 				erode(eyeROI, eyeROI, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 
+				cv::imshow("eyeROI", eyeROI_thresh);
 
 				mu = moments(eyeROI);
 				xCen = mu.m10/mu.m00;
@@ -173,7 +177,6 @@ center pupilDetect(Mat frame)
 				//cout<<xCen<<"\t";
 				//cout<<yCen<<endl;
 
-				cv::imshow("eyeROI", eyeROI);
 
 				//cout<< xmin;
 				//cout<<ymin;
@@ -289,14 +292,14 @@ int main( int argc, char** argv )
 
 			namedWindow("Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
 			//Create trackbars in "Control" window
-			cvCreateTrackbar("LowH", "Control", &iLowpH, 179); //Hue (0 - 179)
-			cvCreateTrackbar("HighH", "Control", &iHighpH, 179);
+			cvCreateTrackbar("LowpH", "Control", &iLowpH, 179); //Hue (0 - 179)
+			cvCreateTrackbar("HighpH", "Control", &iHighpH, 179);
 
-			cvCreateTrackbar("LowS", "Control", &iLowpS, 255); //Saturation (0 - 255)
-			cvCreateTrackbar("HighS", "Control", &iHighpS, 255);
+			cvCreateTrackbar("LowpS", "Control", &iLowpS, 255); //Saturation (0 - 255)
+			cvCreateTrackbar("HighpS", "Control", &iHighpS, 255);
 
-			cvCreateTrackbar("LowV", "Control", &iLowpV, 255); //Value (0 - 255)
-			cvCreateTrackbar("HighV", "Control", &iHighpV, 255);
+			cvCreateTrackbar("LowpV", "Control", &iLowpV, 255); //Value (0 - 255)
+			cvCreateTrackbar("HighpV", "Control", &iHighpV, 255);
 			cvCreateTrackbar("finalize", "Control", &flag, 1);
 
 			if(flag==0)
