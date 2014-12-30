@@ -26,6 +26,16 @@ int iHighS = 255;
 int iLowV = 90;
 int iHighV = 255;
 
+int iLowpH = 130;
+int iHighpH = 179;
+
+int iLowpS = 90;
+int iHighpS = 255;
+
+int iLowpV = 90;
+int iHighpV = 255;
+
+
 int thresh=39;  // threshold variable for trackbar
 int flag=0;  // to return from function marker Detect
 //int mx,my=0;
@@ -135,16 +145,18 @@ center pupilDetect(Mat frame)
 			for( size_t j = 0; j < eyes.size(); j++ )     //draw circle around every detected eye
 			{
 				//int j=0;
-				eyeROI = frame_gray( eyes[j] );
+				//eyeROI = frame_gray( eyes[j] );			// extracting gray eyes from the gray scale image
+				eyeROI = frame( eyes[j] );            //extracting colored eyes form the original image
 				Point center( eyes[j].x + eyes[j].width*0.5, eyes[j].y + eyes[j].height*0.5 );
 				int radius = cvRound( (eyes[j].width + eyes[j].height)*0.25 );
-				circle( frame, center, radius, Scalar( 255, 0, 0 ), 4, 8, 0 );
+				//circle( frame, center, radius, Scalar( 255, 0, 0 ), 4, 8, 0 );
 				imshow("original image",frame);
 				imshow("eyes", eyeROI);
 
+				cvtColor(eyeROI, eyeROI, COLOR_BGR2HSV); //Convert the captured eyeROI from BGR to HSV
+				//cv::threshold(eyeROI, eyeROI, thresh, 255, cv::THRESH_BINARY_INV);    //binary thresholding of gray scale eyes
 
-
-				cv::threshold(eyeROI, eyeROI, thresh, 255, cv::THRESH_BINARY_INV);
+				inRange(eyeROI, Scalar(iLowpH, iLowpS, iLowpV), Scalar(iHighpH, iHighpS, iHighpV), eyeROI); // callback func for hsv thresholding using trackbars created in main
 
 				//morphological opening (remove small objects from the foreground)
 				erode(eyeROI, eyeROI, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
@@ -182,15 +194,15 @@ center pupilDetect(Mat frame)
 	}
 
 void calibration()
-{
-	b1 = ((thetah[1] - thetah[2])/(float)(vx[1]-vx[2]));
-	a1 = ((vx[1]*thetah[2]-thetah[1]*vx[2])/(float)(vx[1]-vx[2]));
+	{
+		b1 = ((thetah[1] - thetah[2])/(float)(vx[1]-vx[2]));
+		a1 = ((vx[1]*thetah[2]-thetah[1]*vx[2])/(float)(vx[1]-vx[2]));
 
-	b2 = ((thetav[1] - thetav[2])/(float)(vy[1]-vy[2]));
-	a2 = ((vy[1]*thetav[2]-thetav[1]*vy[2])/(float)(vy[1]-vy[2]));
+		b2 = ((thetav[1] - thetav[2])/(float)(vy[1]-vy[2]));
+		a2 = ((vy[1]*thetav[2]-thetav[1]*vy[2])/(float)(vy[1]-vy[2]));
 
-	cout << "b1= "<<b1<<" a1= "<<a1<<"b2= "<<b2<<" a2= "<<a2;
-}
+		cout << "b1= "<<b1<<" a1= "<<a1<<"b2= "<<b2<<" a2= "<<a2;
+	}
 
 int main( int argc, char** argv )
 	{
@@ -270,14 +282,28 @@ int main( int argc, char** argv )
 			cout << "Cannot read a frame from video stream" << endl;
 			break;
 			}
-			namedWindow("pupil Thresholding",CV_WINDOW_AUTOSIZE);
+		/*	namedWindow("pupil Thresholding",CV_WINDOW_AUTOSIZE);
 			cvCreateTrackbar("Thresh", "pupil Thresholding", &thresh, 255,onTrack); // create a trackbar for pupil thresholding - grayThreshold (0 - 255)
 			cvCreateTrackbar("finalize", "pupil Thresholding", &flag, 1);
+			*/
+
+			namedWindow("Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
+			//Create trackbars in "Control" window
+			cvCreateTrackbar("LowH", "Control", &iLowpH, 179); //Hue (0 - 179)
+			cvCreateTrackbar("HighH", "Control", &iHighpH, 179);
+
+			cvCreateTrackbar("LowS", "Control", &iLowpS, 255); //Saturation (0 - 255)
+			cvCreateTrackbar("HighS", "Control", &iHighpS, 255);
+
+			cvCreateTrackbar("LowV", "Control", &iLowpV, 255); //Value (0 - 255)
+			cvCreateTrackbar("HighV", "Control", &iHighpV, 255);
+			cvCreateTrackbar("finalize", "Control", &flag, 1);
 
 			if(flag==0)
 			pcen = pupilDetect(imgOriginal);
 			else
 			{
+			destroyWindow("Control");
 			destroyWindow("pupil Thresholding");
 			destroyWindow("eyes");
 			destroyWindow("eyeROI");
