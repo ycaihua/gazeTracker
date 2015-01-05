@@ -26,14 +26,14 @@ int iHighS = 255;
 int iLowV = 90;
 int iHighV = 255;
 
-int iLowpH = 130;
-int iHighpH = 179;
+int iLowpH = 100;
+int iHighpH = 150;
 
-int iLowpS = 90;
-int iHighpS = 255;
+int iLowpS = 110;
+int iHighpS = 140;
 
-int iLowpV = 90;
-int iHighpV = 255;
+int iLowpV = 100;
+int iHighpV = 145;
 
 
 int thresh=39;  // threshold variable for trackbar
@@ -55,8 +55,8 @@ float width = 2*half_width;
 float length = 2*half_length;
 int vx[2]={0};
 int vy[2]={0};
-float thetah[2]={0,half_length};
-float thetav[2]={0,0};
+float thetah[2]={-half_length,half_length};
+float thetav[2]={0,width};
 
 float b1,b2,a1,a2;
 
@@ -155,11 +155,11 @@ center pupilDetect(Mat frame)
 				imshow("eyes", eyeROI);
 
 				//cv::threshold(eyeROI, eyeROI, thresh, 255, cv::THRESH_BINARY_INV);    //binary thresholding of gray scale eyes
-				//cv::threshold(eyeROI, eyeROI, thresh, 255, cv::THRESH_BINARY_INV|CV_THRESH_OTSU);
+				//cv::threshold(eyeROI, eyeROI_thresh, thresh, 255, cv::THRESH_BINARY_INV|CV_THRESH_OTSU);
 				Canny(eyeROI,eyeROI_thresh,iLowpH,iHighpH,3);
 
 				//cvtColor(eyeROI, eyeROI, COLOR_BGR2HSV); //Convert the captured eyeROI from BGR to HSV
-				inRange(eyeROI, Scalar(iLowpH, iLowpS, iLowpV), Scalar(iHighpH, iHighpS, iHighpV), eyeROI); // callback func for hsv thresholding using trackbars created in main
+				//inRange(eyeROI, Scalar(iLowpH, iLowpS, iLowpV), Scalar(iHighpH, iHighpS, iHighpV), eyeROI_thresh); // callback func for hsv thresholding using trackbars created in main
 
 				//morphological opening (remove small objects from the foreground)
 				erode(eyeROI, eyeROI, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
@@ -171,7 +171,8 @@ center pupilDetect(Mat frame)
 
 				cv::imshow("eyeROI", eyeROI_thresh);
 
-				mu = moments(eyeROI);
+				mu = moments(eyeROI_thresh);
+				//mu = moments(eyeROI);
 				xCen = mu.m10/mu.m00;
 				yCen = mu.m01/mu.m00;
 				//cout<<xCen<<"\t";
@@ -292,8 +293,8 @@ int main( int argc, char** argv )
 
 			namedWindow("Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
 			//Create trackbars in "Control" window
-			cvCreateTrackbar("LowpH", "Control", &iLowpH, 179); //Hue (0 - 179)
-			cvCreateTrackbar("HighpH", "Control", &iHighpH, 179);
+			cvCreateTrackbar("LowpH", "Control", &iLowpH, 255); //Hue (0 - 179)
+			cvCreateTrackbar("HighpH", "Control", &iHighpH, 255);
 
 			cvCreateTrackbar("LowpS", "Control", &iLowpS, 255); //Saturation (0 - 255)
 			cvCreateTrackbar("HighpS", "Control", &iHighpS, 255);
