@@ -49,16 +49,16 @@ typedef struct center   // structure for marker centroids
 
 //calibration global var
 int calibration_pts=2;
-float half_width=10;
-float half_length=17;
-float width = 2*half_width;
-float length = 2*half_length;
+float width=20;
+float length=35;
+
 int vx[2]={0};
 int vy[2]={0};
-float thetah[2]={-half_length,half_length};
-float thetav[2]={0,width};
 
-float b1,b2,a1,a2;
+float sx[2]={-length*0.5,width*0.5};
+float sy[2]={length*0.5,-width*0.5};
+
+float a1,b1,a0,b0;
 
 /*Function Definition*/
 
@@ -155,7 +155,9 @@ center pupilDetect(Mat frame)
 				//eyeROI = frame( eyes[j] );            //extracting colored eyes form the original image
 				Point center( eyes[j].x + eyes[j].width*0.5, eyes[j].y + eyes[j].height*0.5 );
 				int radius = cvRound( (eyes[j].width + eyes[j].height)*0.25 );
-				circle( frame, center, 2*radius, Scalar( 255, 0, 0 ), 4, 8, 0 );
+				circle(frame, center, 2*radius, Scalar( 255, 0, 0 ), 4, 8, 0 );
+
+				//eyeROI = Mat(eyeROI,Rect(center.x-eyes[j].width*0.5,center.y-eyes[j].height*0.5+20,eyes[j].width,eyes[j].height-20));
 				imshow("original image",frame);
 				imshow("eyes", eyeROI);
 
@@ -201,6 +203,9 @@ center pupilDetect(Mat frame)
 					}
 				}
 
+				//Min filter
+
+
 				//cv::threshold(eyeROI, eyeROI, thresh, 255, cv::THRESH_BINARY_INV);    //binary thresholding of gray scale eyes
 				//cv::threshold(eyeROI, eyeROI_thresh, thresh, 255, cv::THRESH_BINARY_INV|CV_THRESH_OTSU);
 				//Canny(eyeROI,eyeROI_thresh,iLowpH,iHighpH,3);
@@ -211,8 +216,8 @@ center pupilDetect(Mat frame)
 				//inRange(eyeROI, Scalar(iLowpH, iLowpS, iLowpV), Scalar(iHighpH, iHighpS, iHighpV), eyeROI_thresh); // callback func for hsv thresholding using trackbars created in main
 
 				//morphological opening (remove small objects from the foreground)
-				//erode(eyeROI, eyeROI, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-				//dilate( eyeROI, eyeROI, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+				erode(eyeROI, eyeROI, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+				dilate( eyeROI, eyeROI, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 
 				//morphological closing (fill small holes in the foreground)
 				//dilate( eyeROI, eyeROI, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
@@ -223,18 +228,10 @@ center pupilDetect(Mat frame)
 
 				mu = moments(eyeROI_thresh);
 				//mu = moments(eyeROI);
-				xCen = mu.m10/mu.m00;
-				yCen = mu.m01/mu.m00;
-				//cout<<xCen<<"\t";
-				//cout<<yCen<<endl;
+				pcen.x = mu.m10/mu.m00;
+				pcen.y = mu.m01/mu.m00;
 
-
-				//cout<< xmin;
-				//cout<<ymin;
-
-					pcen.x=xCen;
-					pcen.y=yCen;
-					return pcen;
+				return pcen;
 					//-- Show what you got
 					imshow( window_name, frame );
 				}
@@ -249,13 +246,14 @@ center pupilDetect(Mat frame)
 
 void calibration()
 	{
-		b1 = ((thetah[1] - thetah[2])/(float)(vx[1]-vx[2]));
-		a1 = ((vx[1]*thetah[2]-thetah[1]*vx[2])/(float)(vx[1]-vx[2]));
 
-		b2 = ((thetav[1] - thetav[2])/(float)(vy[1]-vy[2]));
-		a2 = ((vy[1]*thetav[2]-thetav[1]*vy[2])/(float)(vy[1]-vy[2]));
+		a1 = ((sx[1] - sx[2])/(float)(vx[1]-vx[2]));
+		a0 = ((vx[1]*sx[2]-sx[1]*vx[2])/(float)(vx[1]-vx[2]));
 
-		cout << "b1= "<<b1<<" a1= "<<a1<<"b2= "<<b2<<" a2= "<<a2;
+		b1 = (float(sy[1] - sy[2])/(float)(vy[1]-vy[2]));
+		b0 = (float(vy[1]*sy[2]-sy[1]*vy[2])/(float)(vy[1]-vy[2]));
+
+		cout << "a1= "<<a1<<" a0= "<<a0<<"b1= "<<b1<<" b0= "<<b0;
 	}
 
 int main( int argc, char** argv )
@@ -266,7 +264,7 @@ int main( int argc, char** argv )
 		center pcen;
 
 		//realtime tracking vars
-		float thetah,thetav=0; //
+		float sx,sy=0; //
 		int vx_local,vy_local;           // eye-marker vector
 
 		VideoCapture cap(0); //capture the video from web cam
@@ -431,9 +429,9 @@ int main( int argc, char** argv )
 				vx_local = mcen.x - pcen.x;
 				vy_local = mcen.y - pcen.y;
 				cout<< "pcen.x= "<<pcen.x<<"mcen.x= "<<mcen.x;
-				thetah = b1*vx_local + a1;
-				thetav = b2*vy_local + a2;
-				cout << " Thetah = "<<thetah <<" Thetav ="<<thetav << endl;
+				sx = a1*vx_local + a0;
+				sy = b1*vy_local + b0;
+				cout << " sx = "<<sx <<" sy ="<<sy << endl;
 
 				if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
 				{
