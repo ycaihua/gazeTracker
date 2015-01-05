@@ -43,8 +43,8 @@ int flag=0;  // to return from function marker Detect
 
 typedef struct center   // structure for marker centroids
 {
-	int x=0;
-	int y=0;
+	int x;
+	int y;
 };
 
 //calibration global var
@@ -119,7 +119,12 @@ center pupilDetect(Mat frame)
 		vector<Rect> eyes;  // vector of segmented eyes
 		Mat eyeROI;
 		Mat eyeROI_thresh;		// Region of interesti.e. eyes
-		Moments mu;
+
+		Moments mu;  // moments object to calculate centroid of the Iris
+
+		int hist[256]={0};   // histogram of image
+		float prob[256]={0};
+
 		int xCen;
 		int yCen;
 		center pcen;
@@ -154,22 +159,67 @@ center pupilDetect(Mat frame)
 				imshow("original image",frame);
 				imshow("eyes", eyeROI);
 
+				eyeROI_thresh = eyeROI;
+
+				for (int i=0;i<eyeROI.rows;i++)
+				{
+					for (int j=0;j<eyeROI.cols;j++)
+					{
+						hist[eyeROI.at<uchar>(i,j)]++;
+					}
+				}
+
+				//for (int i=0;i<256;i++)		//printing the histogram
+				//cout << hist[i] << endl;
+
+				for (int i=0;i<256;i++) //probability
+				{
+					//if(hist[1]>0)
+					prob[i] = float(hist[i])/float(eyeROI.rows*eyeROI.cols);
+				}
+
+
+				for (int i=0;i<255;i++)    //finding the cdf function
+				{
+					prob[i+1]+=prob[i];
+				}
+
+				//thresholding based on cdf
+
+
+				for (int i=0;i<eyeROI.rows;i++)
+				{
+					for (int j=0;j<eyeROI.cols;j++)
+					{
+						//cout << eyeROI.at<uchar>(i,j) << endl;
+
+						if(prob[eyeROI.at<uchar>(i,j)]<0.07)
+							eyeROI_thresh.at<uchar>(i,j) = 255;
+						else
+							eyeROI_thresh.at<uchar>(i,j) = 0;
+
+					}
+				}
+
 				//cv::threshold(eyeROI, eyeROI, thresh, 255, cv::THRESH_BINARY_INV);    //binary thresholding of gray scale eyes
 				//cv::threshold(eyeROI, eyeROI_thresh, thresh, 255, cv::THRESH_BINARY_INV|CV_THRESH_OTSU);
-				Canny(eyeROI,eyeROI_thresh,iLowpH,iHighpH,3);
+				//Canny(eyeROI,eyeROI_thresh,iLowpH,iHighpH,3);
+
+
 
 				//cvtColor(eyeROI, eyeROI, COLOR_BGR2HSV); //Convert the captured eyeROI from BGR to HSV
 				//inRange(eyeROI, Scalar(iLowpH, iLowpS, iLowpV), Scalar(iHighpH, iHighpS, iHighpV), eyeROI_thresh); // callback func for hsv thresholding using trackbars created in main
 
 				//morphological opening (remove small objects from the foreground)
-				erode(eyeROI, eyeROI, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-				dilate( eyeROI, eyeROI, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+				//erode(eyeROI, eyeROI, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+				//dilate( eyeROI, eyeROI, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 
 				//morphological closing (fill small holes in the foreground)
-				dilate( eyeROI, eyeROI, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-				erode(eyeROI, eyeROI, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+				//dilate( eyeROI, eyeROI, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+				//erode(eyeROI, eyeROI, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 
-				cv::imshow("eyeROI", eyeROI_thresh);
+
+				cv::imshow("eyeROI_thresh", eyeROI_thresh);
 
 				mu = moments(eyeROI_thresh);
 				//mu = moments(eyeROI);
@@ -293,6 +343,7 @@ int main( int argc, char** argv )
 
 			namedWindow("Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
 			//Create trackbars in "Control" window
+			/*
 			cvCreateTrackbar("LowpH", "Control", &iLowpH, 255); //Hue (0 - 179)
 			cvCreateTrackbar("HighpH", "Control", &iHighpH, 255);
 
@@ -301,6 +352,8 @@ int main( int argc, char** argv )
 
 			cvCreateTrackbar("LowpV", "Control", &iLowpV, 255); //Value (0 - 255)
 			cvCreateTrackbar("HighpV", "Control", &iHighpV, 255);
+			*/
+			//cvCreateTrackbar("threshold", "Control", &thresh, 255e);
 			cvCreateTrackbar("finalize", "Control", &flag, 1);
 
 			if(flag==0)
@@ -308,9 +361,9 @@ int main( int argc, char** argv )
 			else
 			{
 			destroyWindow("Control");
-			destroyWindow("pupil Thresholding");
+			//destroyWindow("pupil Thresholding");
 			destroyWindow("eyes");
-			destroyWindow("eyeROI");
+			destroyWindow("eyeROI_thresh");
 			destroyWindow("original image");
 			cout << pcen.x << " " << pcen.y << endl;
 			flag=0;
